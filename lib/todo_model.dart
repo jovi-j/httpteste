@@ -1,22 +1,16 @@
+import 'package:httpteste/user_model.dart';
+
 class Todo {
   final int userId;
   final int id;
   final String title;
   final bool completed;
+  User user;
 
-  const Todo({
-    required this.userId,
-    required this.id,
-    required this.title,
-    required this.completed,
-  });
+  Todo(this.userId, this.id, this.title, this.completed, this.user);
 
-  factory Todo.fromJson(Map<String, dynamic> json) {
+  factory Todo.fromJson(Map<String, dynamic> json, User user) {
     return Todo(
-      userId: json['userId'],
-      id: json['id'],
-      title: json['title'],
-      completed: json['completed'],
-    );
+        json['userId'], json['id'], json['title'], json['completed'], user);
   }
 }

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:httpteste/todo_model.dart';
+import 'package:httpteste/user_model.dart';
 
 Future<List<Todo>> fetchTodos() async {
   final response =
@@ -12,10 +13,28 @@ Future<List<Todo>> fetchTodos() async {
     throw Exception("Error");
   }
 
+  List<User> users = await fetchUsers();
+
   List<Todo> todos = (json.decode(response.body) as List)
-      .map((data) => Todo.fromJson(data))
+      .map((data) =>
+          Todo.fromJson(data, users.firstWhere((u) => u.id == data['userId'])))
       .toList();
+
   return todos;
+}
+
+Future<List<User>> fetchUsers() async {
+  final response =
+      await http.get(Uri.parse('https://jsonplaceholder.typicode.com/users/'));
+
+  if (response.statusCode != 200) {
+    throw Exception("Error");
+  }
+
+  List<User> users = (json.decode(response.body) as List)
+      .map((data) => User.fromJson(data))
+      .toList();
+  return users;
 }
 
 void main() => runApp(const MyHomePage());
@@ -88,11 +107,24 @@ class TodoWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: IconButton(
-        icon: Icon(
-            todo.completed ? Icons.done : Icons.access_time_filled_rounded),
+        icon: todo.completed
+            ? const Icon(
+                Icons.done,
+                color: Colors.green,
+              )
+            : const Icon(
+                Icons.access_time_filled_rounded,
+              ),
         onPressed: () {},
       ),
-      title: Text(todo.title, softWrap: true),
+      title: Column(
+        children: [
+          Text(todo.user.name,
+              style: const TextStyle(
+                  color: Colors.lightGreen, fontStyle: FontStyle.italic)),
+          Text(todo.title),
+        ],
+      ),
       trailing: const Icon(Icons.more_vert),
     );
   }
